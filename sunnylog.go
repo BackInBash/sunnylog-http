@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+    "github.com/influxdata/influxdb/client/v2"
 )
 
 func check(err error) {
@@ -79,6 +80,47 @@ func getlog(baseUrl string, timeFrom int64, timeTo int64, token string) {
 	fmt.Println("logger Status:", resp.Status)
 	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println("response Body:", string(body))
+    var logResult map[string]interface{}
+    err = json.Unmarshal(body, &logResult)
+    check(err)
+    var inverterLog = logResult["result"].(map[string]interface{})
+    for inverter, logValues := range inverterLog {
+        savelog(inverter, logValues.([]interface{}))
+    }
+}
+
+func savelog(inverter string, logValues []interface{}) {
+    fmt.Println(inverter)
+    c, err := client.NewHTTPClient(client.HTTPConfig{
+        Addr: "http://localhost:8086",
+    })
+    if err != nil {
+        fmt.Println("Error creating InfluxDB Client: ", err.Error())
+    }
+    defer c.Close()
+
+    bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
+        Database:  "sunnylog",
+        Precision: "s",
+    })
+
+    tags := map[string]string{"inverter": inverter}
+    for _, value := range logValues {
+        dataPoint := value.(map[string]interface{})
+        fields := map[string]interface{}{
+            "watt_hours": dataPoint["v"],
+        }
+        pt, err := client.NewPoint("production",
+            tags,
+            fields,
+            time.Unix(int64(dataPoint["t"].(float64)), 0))
+        if err != nil {
+            fmt.Println("Error: ", err.Error())
+        }
+        bp.AddPoint(pt)
+    }
+    // Write the batch
+    c.Write(bp)
 }
 
 func main() {
