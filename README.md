@@ -1,4 +1,21 @@
 # sunnylog-http
-Download production data from SMA Sunny Boy using the HTTP interface
+Download production data from SMA Sunny Boy using the HTTP interface.
 
-Set the environment variables `SMA_BASEURL` e.g. `http://192.168.1.23` and `SMA_PASSWORD` to the password for `User` before running this program.
+## Usage:
+
+```bash
+./sunnylog-http --solarUrl http://[SunnyBoyUrl] --solarPassword [SunnyBoy User Password] --influxUrl http://[InfluxDB HTTP API]
+```
+
+### Supported Operating Systems:
++ Windows x64
++ Linux x64
+
+## Build
+
+To Build the Project the following InfluxDB Client Branch must be used `master-1.x`.
+
+1. To Switch the Branch `go get` all Dependencies
+1. Change to InfluxDB Client Folder `cd ~/go/src/github.com/influxdata/influxdb`
+1. Switch Git Branch `git checkout master-1.x`
+1. Build the Project `go build` 💥
