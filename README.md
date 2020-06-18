@@ -1,7 +1,7 @@
 # sunnylog-http
 Download production data from SMA Sunny Boy using the HTTP interface.
 
-Tested against SUNNY BOY 1.5 with Firmware 3.10.7.R
+**Tested against SUNNY BOY 1.5 with Firmware 3.10.7.R**
 
 ## Usage:
 
