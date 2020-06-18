@@ -27,7 +27,7 @@ func loginToken(baseUrl string, user string, pwd string) string {
 	loginUrl := baseUrl + "/dyn/login.json"
 	values := map[string]string{"right": user, "pass": pwd}
 	jsonValue, _ := json.Marshal(values)
-	resp, err := http.Post(loginUrl, "application/json", bytes.NewBuffer(jsonValue))
+	resp, err := http.Post(loginUrl, "application/json;charset=UTF-8", bytes.NewBuffer(jsonValue))
 	check(err)
 
 	fmt.Println("login Status:", resp.Status)
