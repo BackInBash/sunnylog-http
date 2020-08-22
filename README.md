@@ -12,7 +12,7 @@ Download production data from SMA Sunny Boy using the HTTP interface.
 ### Supported Operating Systems:
 + Windows x64
 + Linux x64
-+ Linxu ARM
++ Linux ARM
 
 ## Build
 
