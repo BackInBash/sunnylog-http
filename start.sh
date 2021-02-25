@@ -1,7 +1,7 @@
 #!/bin/sh
 while true
 do
-    /opt/sunnylog --solarUrl $SUNNYBOYURL --solarPassword $SUNNYBOYPASSWD --influxUrl $INFLUXAPI --influxUser $INFLUXUSER --influxPass $INFLUXPASS
+    /opt/sunnylog-v2 --solarUrl $SUNNYBOYURL --solarPassword $SUNNYBOYPASSWD --influxUrl $INFLUXAPI --influxToken $INFLUXTOKEN
     # Sleep 5 min
     sleep 300
 done
