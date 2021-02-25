@@ -5,17 +5,20 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/influxdata/influxdb/client/v2"
+	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-var InfluxUrl = ""
+var InfluxURL = ""
+var InfluxToken = ""
 
 func check(err error) {
 	if err != nil {
@@ -23,8 +26,8 @@ func check(err error) {
 	}
 }
 
-func loginToken(baseUrl string, user string, pwd string) string {
-	loginUrl := baseUrl + "/dyn/login.json"
+func loginToken(baseURL string, user string, pwd string) string {
+	loginUrl := baseURL + "/dyn/login.json"
 	values := map[string]string{"right": user, "pass": pwd}
 	jsonValue, _ := json.Marshal(values)
 	resp, err := http.Post(loginUrl, "application/json;charset=UTF-8", bytes.NewBuffer(jsonValue))
@@ -42,8 +45,8 @@ func loginToken(baseUrl string, user string, pwd string) string {
 	return sidMap["sid"].(string)
 }
 
-func logout(baseUrl string, token string) {
-	logoutUrl := baseUrl + "/dyn/logout.json?sid=" + token
+func logout(baseURL string, token string) {
+	logoutUrl := baseURL + "/dyn/logout.json?sid=" + token
 	resp, err := http.Post(logoutUrl, "application/json", bytes.NewBuffer([]byte("")))
 	check(err)
 
@@ -60,8 +63,8 @@ func gettimestamp() int64 {
 	return t2.Unix()
 }
 
-func getlog(baseUrl string, timeFrom int64, timeTo int64, token string) {
-	logUrl := baseUrl + "/dyn/getLogger.json?sid=" + token
+func getlog(baseURL string, timeFrom int64, timeTo int64, token string) {
+	logUrl := baseURL + "/dyn/getLogger.json?sid=" + token
 	type LogRequest struct {
 		DestDev []int `json:"destDev"`
 		Key     int   `json:"key"`
@@ -94,18 +97,10 @@ func getlog(baseUrl string, timeFrom int64, timeTo int64, token string) {
 
 func savelog(inverter string, logValues []interface{}) {
 	fmt.Println(inverter)
-	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr: InfluxUrl,
-	})
-	if err != nil {
-		fmt.Println("Error creating InfluxDB Client: ", err.Error())
-	}
-	defer c.Close()
 
-	bp, _ := client.NewBatchPoints(client.BatchPointsConfig{
-		Database:  "sunnylog",
-		Precision: "s",
-	})
+	client := influxdb2.NewClientWithOptions(InfluxURL, InfluxToken, influxdb2.DefaultOptions().SetBatchSize(20))
+
+	writeAPI := client.WriteAPIBlocking("sunnylog", "sunnylog")
 
 	tags := map[string]string{"inverter": inverter}
 	for _, value := range logValues {
@@ -113,22 +108,23 @@ func savelog(inverter string, logValues []interface{}) {
 		fields := map[string]interface{}{
 			"watt_hours": dataPoint["v"],
 		}
-		pt, err := client.NewPoint("production",
+		pt := influxdb2.NewPoint("production",
 			tags,
 			fields,
 			time.Unix(int64(dataPoint["t"].(float64)), 0))
+
+		err := writeAPI.WritePoint(context.Background(), pt)
 		if err != nil {
-			fmt.Println("Error: ", err.Error())
+			panic(err)
 		}
-		bp.AddPoint(pt)
 	}
-	// Write the batch
-	c.Write(bp)
+	// Ensures background processes finishes
+	client.Close()
 }
 
 func main() {
 
-	var baseUrl, password = "", ""
+	var baseURL, password = "", ""
 
 	if os.Args == nil {
 		panic("No CLI Args specified!")
@@ -136,24 +132,39 @@ func main() {
 
 	for index, arg := range os.Args {
 		if arg == "--solarUrl" {
-			baseUrl = os.Args[index+1]
+			baseURL = os.Args[index+1]
 		}
 		if arg == "--solarPassword" {
 			password = os.Args[index+1]
 		}
 		if arg == "--influxUrl" {
-			InfluxUrl = os.Args[index+1]
+			InfluxURL = os.Args[index+1]
+		}
+		if arg == "--influxToken" {
+			InfluxToken = os.Args[index+1]
 		}
 	}
 
-	if baseUrl == "" || password == "" || InfluxUrl == "" {
+	// Check for Base Url
+	if baseURL == "" {
+		log.Fatalf("No SunnyBoy Base URL specified!")
+	}
+	// Check for API Key
+	if InfluxToken == "" {
+		log.Fatalf("No API Key specified!")
+	}
+	// Check for FloatingIP
+	if password == "" {
+		log.Fatalf("No SunnyBoy Password specified!")
+	}
+	if baseURL == "" || password == "" || InfluxURL == "" {
 		print("No CLI Parameter...\n --solarUrl      |  SunnyBoy Web URL\n --solarPassword |  SunnyBoy Password\n --influxUrl     |  InfluxDB API\n")
 		return
 	}
 
-	token := loginToken(baseUrl, "usr", password)
+	token := loginToken(baseURL, "usr", password)
 	timeFrom := gettimestamp()
 	timeTo := time.Now().Unix()
-	getlog(baseUrl, timeFrom, timeTo, token)
-	logout(baseUrl, token)
+	getlog(baseURL, timeFrom, timeTo, token)
+	logout(baseURL, token)
 }

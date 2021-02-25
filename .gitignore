@@ -4,6 +4,7 @@
 *.so
 *.dylib
 sunnylog
+sunnylog-v2
 
 # Test binary, build with `go test -c`
 *.test
