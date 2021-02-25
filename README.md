@@ -11,6 +11,17 @@ Download production data from SMA Sunny Boy using the HTTP interface.
 ./sunnylog-http --solarUrl http://[SunnyBoyUrl] --solarPassword [SunnyBoy User Password] --influxUrl http://[InfluxDB HTTP API]
 ```
 
+**Run as Docker Container**
+```bash
+docker run -d 
+    -e SUNNYBOYURL=http://[SunnyBoyUrl] \
+    -e SUNNYBOYPASSWD=[SunnyBoy User Password] \
+    -e INFLUXAPI=http://[InfluxDB HTTP API] \
+    -e INFLUXUSER=(optional)admin \
+    -e INFLUXPASS=(optional)12345678
+    ghcr.io/backinbash/sunnylog-http/sunnylog:v0.4
+```
+
 ### Supported Operating Systems:
 + Windows x64
 + Linux x64
