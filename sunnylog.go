@@ -16,6 +16,8 @@ import (
 )
 
 var InfluxUrl = ""
+var InfluxUser = ""
+var InfluxPass = ""
 
 func check(err error) {
 	if err != nil {
@@ -95,7 +97,9 @@ func getlog(baseUrl string, timeFrom int64, timeTo int64, token string) {
 func savelog(inverter string, logValues []interface{}) {
 	fmt.Println(inverter)
 	c, err := client.NewHTTPClient(client.HTTPConfig{
-		Addr: InfluxUrl,
+		Addr:     InfluxUrl,
+		Username: InfluxUser,
+		Password: InfluxPass,
 	})
 	if err != nil {
 		fmt.Println("Error creating InfluxDB Client: ", err.Error())
@@ -143,6 +147,12 @@ func main() {
 		}
 		if arg == "--influxUrl" {
 			InfluxUrl = os.Args[index+1]
+		}
+		if arg == "--influxUser" {
+			InfluxUser = os.Args[index+1]
+		}
+		if arg == "--influxPass" {
+			InfluxPass = os.Args[index+1]
 		}
 	}
 
