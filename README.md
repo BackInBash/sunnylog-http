@@ -5,8 +5,19 @@ Download production data from SMA Sunny Boy using the HTTP interface.
 
 ## Usage:
 
+### Standalone Binary
 ```bash
 ./sunnylog-http --solarUrl http://[SunnyBoyUrl] --solarPassword [SunnyBoy User Password] --influxUrl http://[InfluxDB HTTP API]
+```
+
+### Docker Container
+
+```bash
+docker run -d -e SUNNYBOYURL=http://[SunnyBoyUrl] \
+ -e SUNNYBOYPASSWD=[SunnyBoy User Password] \
+ -e INFLUXAPI=http://[InfluxDB HTTP API] \
+ -e INFLUXTOKEN=[InfluxDB User Token] \
+ ghcr.io/backinbash/sunnylog-http/sunnylog:v2
 ```
 
 ### Supported Operating Systems:
@@ -14,11 +25,12 @@ Download production data from SMA Sunny Boy using the HTTP interface.
 + Linux x64
 + Linux ARM
 
-## Build
+## Build Binary
 
-To Build the Project the following InfluxDB Client Branch must be used `master-1.x`.
-
-1. To Switch the Branch `go get` all Dependencies
-1. Change to InfluxDB Client Folder `cd ~/go/src/github.com/influxdata/influxdb`
-1. Switch Git Branch `git checkout master-1.x`
+1. Clone the Repo
+1. `go get`
 1. Build the Project `go build` 💥
+
+## Build Container
+1. Clone the Repo
+1. `docker build -t sunnylog .`
