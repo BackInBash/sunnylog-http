@@ -7,7 +7,10 @@ Download production data from SMA Sunny Boy using the HTTP interface.
 
 ### Standalone Binary
 ```bash
-./sunnylog-http --solarUrl http://[SunnyBoyUrl] --solarPassword [SunnyBoy User Password] --influxUrl http://[InfluxDB HTTP API]
+./sunnylog-http --solarUrl http://[SunnyBoyUrl] \ 
+   --solarPassword [SunnyBoy User Password] \
+   --influxUrl http://[InfluxDB HTTP API] \
+   --influxToken [InfluxDB User Token]
 ```
 
 ### Docker Container
