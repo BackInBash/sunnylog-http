@@ -1,6 +1,8 @@
 # sunnylog-http
 Download production data from SMA Sunny Boy using the HTTP interface.
 
+**DEPRECATED Version only for InfluxDB v1.x**
+
 **Tested against SUNNY BOY 1.5 with Firmware 3.10.7.R**
 
 ## Usage:
