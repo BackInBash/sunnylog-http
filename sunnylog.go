@@ -130,6 +130,10 @@ func main() {
 
 	var baseUrl, password = "", ""
 
+	if os.Args == nil {
+		panic("No CLI Args specified!")
+	}
+
 	for index, arg := range os.Args {
 		if arg == "--solarUrl" {
 			baseUrl = os.Args[index+1]
